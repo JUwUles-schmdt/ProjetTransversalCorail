@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,7 +29,7 @@ public class CoralController : MonoBehaviour
     public GameObject bottomNeighbor;
     private static CoralController currentSelected;
 
-    private bool isBuilding;
+    public bool isBuilding { get; private set; }
     private bool willDestroy;
 
 
@@ -84,12 +85,13 @@ public class CoralController : MonoBehaviour
             currentSelected = this;
 
 
-            Color transparentRed = new Color(1f, 1f, 1f, 0.5f);
 
-            ShowNeighbor(leftNeighbor, transparentRed);
-            ShowNeighbor(rightNeighbor, transparentRed);
-            ShowNeighbor(topNeighbor, transparentRed);
-            ShowNeighbor(bottomNeighbor, transparentRed);
+
+
+            ShowNeighbor(leftNeighbor, _GetColor(leftNeighbor));
+            ShowNeighbor(rightNeighbor, _GetColor(rightNeighbor));
+            ShowNeighbor(topNeighbor, _GetColor(topNeighbor));
+            ShowNeighbor(bottomNeighbor, _GetColor(bottomNeighbor));
     }
     }
 
@@ -172,6 +174,44 @@ public class CoralController : MonoBehaviour
             willDestroy = true;
         }
 
+        _timer = _timer * FindObjectOfType<GameManager>().getLight(this.gameObject);
+
         return _timer;
+    }
+
+
+    private Color _GetColor(GameObject _case)
+    {
+
+        float total = 0;
+
+
+        if (FindObjectOfType<GameManager>().specialPositions.Contains(_case))
+        {
+            total++;
+        }
+        if (!FindObjectOfType<GameManager>().row4.Contains(_case))
+        {
+            total++;
+        }
+        if (FindObjectOfType<GameManager>().waterAcid > resChemicals)
+        {
+            total++;
+        }
+
+
+        if (FindObjectOfType<GameManager>().waterAcid > resChemicals*2|| FindObjectOfType<GameManager>().getTemp(_case) > resPhysical * 2)
+        {
+            return new Color(.5f, 0f, 0f, 0.5f);
+        }
+
+
+
+
+
+
+        if (total == 1 || total == 2) return new Color(.5f, .5f, 0f, 0.5f);
+        if (total == 3) return new Color(1f, 0f, 0f, 0.5f);
+        return new Color(0f, 1f, 0f, 0.5f);
     }
 }

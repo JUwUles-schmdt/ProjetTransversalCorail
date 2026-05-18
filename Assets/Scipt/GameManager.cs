@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum especes {Gros, Moyen, Petit }
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private float EventMaxCoolDown;
@@ -37,7 +38,7 @@ public class GameManager : MonoBehaviour
     public GameObject[] row7;
 
 
-    [SerializeField] private List<GameObject> specialPositions = new List<GameObject>();
+    public List<GameObject> specialPositions = new List<GameObject>();
 
 
     public float waterTemp;
@@ -49,6 +50,7 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+
         currentEventCD = Random.Range(EventMinCoolDown, EventMaxCoolDown);
 
 
@@ -152,6 +154,10 @@ public class GameManager : MonoBehaviour
             row7[i].GetComponent<CoralController>().bottomNeighbor = row6[i];
             row7[i].SetActive(false);
         }
+        //for (int i =0; i < specialPositions.Count; i++)
+        //{
+        //    specialPositions[i].SetActive(true);
+        //}
 
     }
 
@@ -251,7 +257,7 @@ public class GameManager : MonoBehaviour
         {
             CoralController cc = row[i].GetComponent<CoralController>();
 
-            if (!cc.exist)
+            if (!cc.exist&&!cc.isBuilding)
             {
                 cc.state = template.state;
                 cc.energyMax = template.energyMax;
@@ -266,12 +272,6 @@ public class GameManager : MonoBehaviour
 
                 cc.exist = false;
                 cc.hovered = false;
-
-                // reset visuel
-                Button btn = row[i].GetComponent<Button>();
-                ColorBlock colors = btn.colors;
-                colors.normalColor = new Color(1f, 1f, 1f, 1f);
-                btn.colors = colors;
             }
         }
     }
@@ -287,4 +287,28 @@ public class GameManager : MonoBehaviour
         return 50f;
     }
 
+
+    public float getLight(GameObject position)
+    {
+        if (row1.Contains(position) || row2.Contains(position))
+        {
+            return 1f;
+        }
+        if (row7.Contains(position) || row3.Contains(position))
+        {
+
+            return .9f;
+        }
+        if (row6.Contains(position) || row4.Contains(position))
+        {
+
+            return .8f;
+        }
+        if (row5.Contains(position))
+        {
+
+            return .5f;
+        }
+        else return 2f;
+    }
 }
