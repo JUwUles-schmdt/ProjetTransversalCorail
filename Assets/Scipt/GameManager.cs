@@ -1,5 +1,7 @@
-using UnityEngine;
+using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public enum especes {Gros, Moyen, Petit }
 public class GameManager : MonoBehaviour
@@ -35,12 +37,14 @@ public class GameManager : MonoBehaviour
     public GameObject[] row7;
 
 
-
+    [SerializeField] private List<GameObject> specialPositions = new List<GameObject>();
 
 
     public float waterTemp;
     public float waterAcid;
 
+
+    private GameObject swapPrefab;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -227,5 +231,60 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void swapBuildPlan(GameObject prefab)
+    {
+        swapPrefab = prefab;
+
+        ReplaceRow(row1);
+        ReplaceRow(row2);
+        ReplaceRow(row3);
+        ReplaceRow(row4);
+        ReplaceRow(row5);
+        ReplaceRow(row6);
+        ReplaceRow(row7);
+    }
+    private void ReplaceRow(GameObject[] row)
+    {
+        CoralController template = swapPrefab.GetComponent<CoralController>();
+
+        for (int i = 0; i < row.Length; i++)
+        {
+            CoralController cc = row[i].GetComponent<CoralController>();
+
+            if (!cc.exist)
+            {
+                cc.state = template.state;
+                cc.energyMax = template.energyMax;
+                cc.currentEnergy = 0f;
+                cc.energyRegen = template.energyRegen;
+
+                cc.price = template.price;
+                cc.resChemicals = template.resChemicals;
+                cc.resPhysical = template.resPhysical;
+
+                cc.type = template.type;
+
+                cc.exist = false;
+                cc.hovered = false;
+
+                // reset visuel
+                Button btn = row[i].GetComponent<Button>();
+                ColorBlock colors = btn.colors;
+                colors.normalColor = new Color(1f, 1f, 1f, 1f);
+                btn.colors = colors;
+            }
+        }
+    }
+
+
+    public float getTemp(GameObject position)
+    {
+        if (specialPositions.Contains(position))
+        {
+            return 75f;
+        }
+
+        return 50f;
+    }
 
 }
