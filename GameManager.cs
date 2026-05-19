@@ -62,6 +62,5 @@ public class GameManager : MonoBehaviour
         else currentDay++;
 
         OnDayChanged?.Invoke(currentDay, currentWeek);
-        Debug.Log($"[GameManager] → Jour {currentDay})");
     }
 }
