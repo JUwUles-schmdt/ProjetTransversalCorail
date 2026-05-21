@@ -60,15 +60,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9812766, g: 1, b: 0.22327036, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 8445962146854893004, guid: 7d3a2ceab3bd11146ba7475cef402ad6, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -142,20 +142,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 1060105033916010053}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cfac802af3e7458419fc29b67069a793, type: 3}
+  m_Script: {fileID: 11500000, guid: 2baa0654aac1b764c81272f7812edb3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   state: 0
   energyMax: 8
   currentEnergy: 0
   energyRegen: 8
-  price: 0
-  resChemicals: 35
-  resPhysical: 65
-  type: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  price: 4
+  resChemicals: 65
+  resPhysical: 35
+  type: {fileID: 8118791734383843468, guid: 80500ae11445480449342786926ba620, type: 3}
   exist: 0
   hovered: 0
   leftNeighbor: {fileID: 0}
   rightNeighbor: {fileID: 0}
   topNeighbor: {fileID: 0}
   bottomNeighbor: {fileID: 0}
+  chain:
+    root: {fileID: 0}
+    corals: []
+    energy: 0
+    maxEnergy: 0
+  gameManager: {fileID: 0}
+  childs: []

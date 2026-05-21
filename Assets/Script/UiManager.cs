@@ -21,7 +21,12 @@ using UnityEngine;
     {
         Ui.SetActive(true);
         if (type!=null) type.sprite= _type;
+        if (pvmax >0)
         barre.transform.localScale = new Vector3(pv / pvmax*baseScale, barre.transform.localScale.y, barre.transform.localScale.z);
+        else
+        {
+            barre.transform.localScale = new Vector3(0, barre.transform.localScale.y, barre.transform.localScale.z);
+        }
         acidite.text = _acidite.ToString();
         temperature.text = _temp.ToString();
     }

@@ -3,14 +3,26 @@ using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
+
+
+[System.Serializable]
+public struct Journal
+{
+    public string titre;
+    public string description;
+}
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private float EventMaxCoolDown;
-    [SerializeField] private float EventMinCoolDown;
-    [HideInInspector] public float EventCD;
-    private float currentEventCD;
+
+
+    public GameObject boutonPause;
+
+
+
+
 
 
     [SerializeField] private float NewsPaperCoolDown;
@@ -19,11 +31,11 @@ public class GameManager : MonoBehaviour
 
 
     public GameObject newsPaper;
-    public TMP_Text News;
-    public GameObject button1;
-    public TMP_Text Choix1;
-    public GameObject button2;
-    public TMP_Text Choix2;
+    public TMP_Text NewsTitle;
+    public TMP_Text NewsDescription;
+
+
+    public List<Journal> journals = new List<Journal>();
 
 
 
@@ -38,20 +50,54 @@ public class GameManager : MonoBehaviour
     public GameObject[] row7;
 
 
-    public List<GameObject> specialPositions = new List<GameObject>();
-
-
     public float waterTemp;
     public float waterAcid;
+    public float waterSpeed;
 
 
     private GameObject swapPrefab;
+
+
+
+
+
+
+    [Header("Time settings")]
+    public float dayDuration = 30f;
+
+    [Header("État courant (lecture seule)")]
+    [SerializeField] private int currentDay = 1;
+    [SerializeField] private int currentWeek = 1;
+    [SerializeField] private float dayTimer = 0f;
+    [SerializeField] private bool isRunning = false;
+
+    public event System.Action<int, int> OnDayChanged;
+    public event System.Action<int> OnWeekChanged;
+    public event System.Action<float, float> OnDayTick;
+
+    public int CurrentDay => currentDay;
+    public int CurrentWeek => currentWeek;
+    public float DayTimer => dayTimer;
+    public float DayProgress => dayTimer / dayDuration;
+    public bool IsRunning => isRunning;
+
+
+
+
+
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
 
-        currentEventCD = Random.Range(EventMinCoolDown, EventMaxCoolDown);
+        newsPaper.SetActive(false);
+
+        (currentDay, currentWeek, dayTimer, isRunning) = (1, 1, 0f, true);
+        Debug.Log("[GameManager] Début — Semaine 1, Jour 1");
+
+
+
 
 
         for (int i = 0; i < rows[0].transform.childCount; i++)
@@ -154,88 +200,40 @@ public class GameManager : MonoBehaviour
             row7[i].GetComponent<CoralController>().bottomNeighbor = row6[i];
             row7[i].SetActive(false);
         }
-        //for (int i =0; i < specialPositions.Count; i++)
-        //{
-        //    specialPositions[i].SetActive(true);
-        //}
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(isPlaying)EventCD += Time.deltaTime;
-        if (isPlaying) NewsPaperCD += Time.deltaTime;
-        if (NewsPaperCD >= NewsPaperCoolDown&& isPlaying) Journal();
-        if (EventCD >= currentEventCD&& isPlaying) EvenementHumain();
-
 
 
     }
+    
 
-    private void EvenementHumain()
+    public void Journal()
     {
-        int randomNumber = Random.Range(1, 5);
-        switch (randomNumber) 
+        newsPaper.SetActive(true);
+        Time.timeScale = 0f;
+        NewsTitle.text = journals[newsPaperCount].titre;
+        NewsDescription.text = journals[newsPaperCount].description;
+    }
+
+    public void toggleJournal()
+    {
+        newsPaper.SetActive(!newsPaper.activeSelf);
+        if (newsPaper.activeSelf)
         {
-            case 1: //petrolier
-
-                break;
-            case 2: //pecheur
-
-                break;
-            case 3: //
-
-                break;
-
+            Time.timeScale = 0f;
+            NewsTitle.text = journals[newsPaperCount].titre;
+            NewsDescription.text = journals[newsPaperCount].description;
         }
-
-        currentEventCD = Random.Range(EventMinCoolDown, EventMaxCoolDown);
-    }
-
-    private void Journal()
-    {
-
-        switch (newsPaperCount)
+        else
         {
-            case 0:
-
-                break;
-            case 1:
-
-                break;
-            case 2:
-
-                break;
-            case 3:
-
-                break;
-            case 4:
-
-                break;
-            case 5:
-
-                break;
-            case 6:
-
-                break;
-            case 7:
-
-                break;
-            case 8:
-
-                break;
-            case 9:
-
-                break;
-            case 10:
-
-                break;
-            case 11:
-
-                break;
+            Time.timeScale = 1f;
         }
     }
+
 
     public void swapBuildPlan(GameObject prefab)
     {
@@ -268,23 +266,21 @@ public class GameManager : MonoBehaviour
                 cc.resChemicals = template.resChemicals;
                 cc.resPhysical = template.resPhysical;
 
+                cc.GetComponent<Image>().sprite = swapPrefab.GetComponent<Image>().sprite;
+
                 cc.type = template.type;
 
                 cc.exist = false;
                 cc.hovered = false;
             }
         }
+        template.Hide();
     }
 
 
     public float getTemp(GameObject position)
     {
-        if (specialPositions.Contains(position))
-        {
-            return 75f;
-        }
-
-        return 50f;
+        return position.GetComponent<CoralController>().resPhysical/waterTemp;
     }
 
 
@@ -310,5 +306,28 @@ public class GameManager : MonoBehaviour
             return .5f;
         }
         else return 2f;
+    }
+
+
+    public void SkipToNextDay() { if (isRunning) AdvanceDay(); }
+    public void PauseTime() => isRunning = false;
+    public void ResumeTime() => isRunning = true;
+
+    private void AdvanceDay()
+    {
+        dayTimer = 0f;
+        if (currentDay >= 7)
+        {
+            currentDay = 1;
+            OnWeekChanged?.Invoke(++currentWeek);
+            Debug.Log($"[GameManager] ── Nouvelle semaine ──");
+            newsPaperCount += 1;
+            Journal();
+        }
+        else currentDay++;
+
+        OnDayChanged?.Invoke(currentDay, currentWeek);
+        Debug.Log($"[GameManager] → Jour {currentDay})");
+        
     }
 }
